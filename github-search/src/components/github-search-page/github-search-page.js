@@ -4,13 +4,13 @@ import {
   Typography,
   Button,
   Container,
-  Grid,
-  Box
+  Grid
 } from '@material-ui/core'
+import Content from './content'
 
 const GithubSearchPage = () => {
   const [isSearching, setIsSearching] = useState(false);
-  const [isSearchApplied, setIsSearchApplied] = useState();
+  const [isSearchApplied, setIsSearchApplied] = useState(false);
 
   const handleClick = async () => {
     setIsSearching(true);
@@ -18,45 +18,6 @@ const GithubSearchPage = () => {
     setIsSearchApplied(true);
     setIsSearching(false);
   }
-
-  const renderContent = () => isSearchApplied ? (
-    <table>
-      <thead>
-        <tr>
-          <th>
-            Repository
-          </th>
-          <th>Stars</th>
-          <th>Forks</th>
-          <th>Open issues</th>
-          <th>Updated at</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>
-          <img src="" alt="test" />
-            <a href="localhost:3000/test">Test</a>
-          </td>
-          <td><a href="localhost:3000/test">5</a></td>
-          <td><a href="localhost:3000/test">10</a></td>
-          <td><a href="localhost:3000/test">100</a></td>
-          <td><a href="localhost:3000/test">10-10-2021</a></td>
-        </tr>
-      </tbody>
-    </table>
-  ) : (
-    <Box
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      height={400}
-    >
-      <Typography>
-        Please provide a search option and click in the search button  
-      </Typography>
-    </Box>
-  )
 
   return (
     <Container>
@@ -86,7 +47,7 @@ const GithubSearchPage = () => {
         </Grid>
       </Grid>
 
-      { renderContent() }
+      <Content isSearchApplied={isSearchApplied} />
     </Container>
   )
 }

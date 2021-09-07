@@ -60,7 +60,7 @@ describe('when user does a search', () => {
     const withinInTable = within(table);
     const tableCells = withinInTable.getAllByRole('cell');
     const [repository, stars, forks, openIssues, updatedAt] = tableCells;
-    expect(within(tableCells[0]).getByRole('img', { name: /test/i }));
+    expect(within(repository).getByRole('img', { name: /test/i }));
     expect(tableCells).toHaveLength(5);
     expect(repository).toHaveTextContent(/test/i); 
     expect(stars).toHaveTextContent(/5/i); 
@@ -71,4 +71,36 @@ describe('when user does a search', () => {
       'href', 'localhost:3000/test'
     );
   });
+
+  it('must display total results number of search and current number of results', async () => {
+    fireClickSearch();
+    await screen.findByRole('table');
+    expect(screen.getByText(/1-1 of 1/)).toBeInTheDocument();
+  });
+
+  it('must display size of page with options: 30, 50, 100, default is 30', async () => {
+    fireClickSearch();
+    await screen.findByRole('table');
+    expect(screen.getByLabelText(/rows per page/i)).toBeInTheDocument();
+    fireEvent.mouseDown(screen.getByLabelText(/rows per page/i));
+    const listbox = screen.getByRole('listbox', { name: /rows per page/i });
+    const options = within(listbox).getAllByRole('option');
+    const [option30, option50, option100] = options;
+    expect(option30).toHaveTextContent(/30/);
+    expect(option50).toHaveTextContent(/50/);
+    expect(option100).toHaveTextContent(/100/);
+  });
+
+  it('must be next and previous pagination buttons', async () => {
+    fireClickSearch();
+    await screen.findByRole('table');
+    const previousButton = screen.getByRole('button', { name: /previous page/i });
+    expect(screen.getByRole('button', { name: /next page/i })).toBeInTheDocument();
+    expect(previousButton).toBeInTheDocument();
+    expect(previousButton).toBeDisabled();
+  });
+});
+
+describe('a', () => {
+  it.todo('b');
 });
