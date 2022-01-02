@@ -7,14 +7,18 @@ import {
   Grid
 } from '@material-ui/core'
 import Content from './content'
+import { getRepos } from '../../services'
 
 const GithubSearchPage = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [isSearchApplied, setIsSearchApplied] = useState(false);
+  const [reposList, setReposList] = useState([]);
 
   const handleClick = async () => {
     setIsSearching(true);
-    await Promise.resolve();
+    const response = await getRepos();
+    const data = await response.json();
+    setReposList(data.items);
     setIsSearchApplied(true);
     setIsSearching(false);
   }
@@ -47,7 +51,7 @@ const GithubSearchPage = () => {
         </Grid>
       </Grid>
 
-      <Content isSearchApplied={isSearchApplied} />
+      <Content isSearchApplied={isSearchApplied} reposList={reposList} />
     </Container>
   )
 }

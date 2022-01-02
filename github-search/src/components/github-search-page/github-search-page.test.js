@@ -2,8 +2,46 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import GithubSearchPage from './github-search-page';
+import { rest } from 'msw';
+import { setupServer } from 'msw/node';
+
+const makeFakeResponse = (total_count, incomplete_results, items) => ({
+  "total_count": total_count,
+  "incomplete_results": incomplete_results,
+  "items": items
+});
+
+const makeFakeRepo = () => ({
+  "id": 363502853,
+  "name": "scraping-falabella",
+  "owner": {
+    "avatar_url": "https://avatars.githubusercontent.com/u/72688964?v=4",
+  },
+  "html_url": "https://github.com/rudyalvaradobeltran/scraping-falabella",
+  "updated_at": "2021-05-01",
+  "stargazers_count": 0,
+  "forks_count": 0,
+  "open_issues_count": 0
+});
+
+const server = setupServer(
+  rest.get('/search/repositories', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json(makeFakeResponse(1, false, [makeFakeRepo()]))
+    );
+  }),
+);
+
+beforeAll(() => server.listen());
+
+afterEach(() => server.resetHandlers());
+
+afterAll(() => server.close());
 
 beforeEach(() => render(<GithubSearchPage />));
+
+const fireClickSearch = () => fireEvent.click(screen.getByRole('button', { name: /search/i }));
 
 describe('when GithubSearchPage is mounted', () => {
   it('must display title', () => {
@@ -22,8 +60,6 @@ describe('when GithubSearchPage is mounted', () => {
 });
 
 describe('when user does a search', () => {
-  const fireClickSearch = () => fireEvent.click(screen.getByRole('button', { name: /search/i }));
-
   it('search button must be disabled until search is done', async () => {
     expect(screen.getByRole('button', { name: /search/i })).not.toBeDisabled();
     fireClickSearch();
@@ -60,16 +96,18 @@ describe('when user does a search', () => {
     const withinInTable = within(table);
     const tableCells = withinInTable.getAllByRole('cell');
     const [repository, stars, forks, openIssues, updatedAt] = tableCells;
-    expect(within(repository).getByRole('img', { name: /test/i }));
+    const avatarImg = within(repository).getByRole('img', { name: makeFakeRepo().name });
+    expect(avatarImg).toBeInTheDocument();
     expect(tableCells).toHaveLength(5);
-    expect(repository).toHaveTextContent(/test/i); 
-    expect(stars).toHaveTextContent(/5/i); 
-    expect(forks).toHaveTextContent(/10/i); 
-    expect(openIssues).toHaveTextContent(/100/i); 
-    expect(updatedAt).toHaveTextContent(/10-10-2021/i); 
-    expect(withinInTable.getByText(/test/i).closest('a')).toHaveAttribute(
-      'href', 'localhost:3000/test'
+    expect(repository).toHaveTextContent(makeFakeRepo().name);
+    expect(stars).toHaveTextContent(makeFakeRepo().stargazers_count); 
+    expect(forks).toHaveTextContent(makeFakeRepo().forks_count); 
+    expect(openIssues).toHaveTextContent(makeFakeRepo().open_issues_count); 
+    expect(updatedAt).toHaveTextContent(makeFakeRepo().updated_at); 
+    expect(withinInTable.getByText(makeFakeRepo().name).closest('a')).toHaveAttribute(
+      'href', makeFakeRepo().html_url
     );
+    expect(avatarImg).toHaveAttribute('src', makeFakeRepo().owner.avatar_url);
   });
 
   it('must display total results number of search and current number of results', async () => {
@@ -101,6 +139,20 @@ describe('when user does a search', () => {
   });
 });
 
-describe('a', () => {
-  it.todo('b');
+describe('when user does a search without results', () => {
+  it('must show an empty state message', async () => {
+    server.use(
+      rest.get('/search/repositories', (req, res, ctx) =>
+        res(
+          ctx.status(200),
+          ctx.json(makeFakeResponse(0, false, []))
+        )
+      )
+    );
+    fireClickSearch();
+    await waitFor(() => 
+      expect(screen.getByText(/your search has no results/i)).toBeInTheDocument()
+    );
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+  });
 });
