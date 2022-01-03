@@ -34,7 +34,7 @@ const Content = ({ isSearchApplied, reposList }) => {
               }) => (
                 <tr key={id}>
                   <td>
-                    <img src={avatar_url} alt={name} />
+                    <img width="70" src={avatar_url} alt={name} />
                     <a href={html_url}>{name}</a>
                   </td>
                   <td>
