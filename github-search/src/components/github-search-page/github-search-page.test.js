@@ -4,6 +4,7 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 import GithubSearchPage from './github-search-page';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
+import { getReposListBy } from '../../__fixtures__/repos';
 
 const makeFakeResponse = (total_count, incomplete_results, items) => ({
   "total_count": total_count,
@@ -155,4 +156,31 @@ describe('when user does a search without results', () => {
     );
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
   });
+});
+
+describe('When the user types on filter by and does a search', () => {
+  it(('must display the related repos'), async () => {
+    const REPO_NAME = 'laravel';
+    const internalFakeResponse = makeFakeResponse();
+    const expectedRepo = getReposListBy({ name: REPO_NAME })[0];
+    server.use(
+      rest.get('/search/repositories', (req, res, ctx) =>
+        res(
+          ctx.status(200),
+          ctx.json({
+            ...internalFakeResponse, 
+            items: getReposListBy({ name: req.url.searchParams.get('q') })
+          })
+        )
+      )
+    );
+    fireEvent.change(screen.getByLabelText(/filter by/i), { target: { value: REPO_NAME } });
+    fireClickSearch();
+    const table = await screen.findByRole('table');
+    expect(table).toBeInTheDocument();
+    const withinInTable = within(table);
+    const tableCells = withinInTable.getAllByRole('cell');
+    const [repository] = tableCells;
+    expect(repository).toHaveTextContent(expectedRepo.name);
+  })
 });
