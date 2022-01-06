@@ -8,7 +8,9 @@ import {
 
 const tableHeaders = ['Repository', 'Stars', 'Forks', 'Open Issues', 'Updated At']
 
-const Content = ({ isSearchApplied, reposList }) => {
+const Content = ({ isSearchApplied, reposList, rowsPerPage, setRowsPerPage }) => {
+  const handleChangeRowsPerPage = ({ target: { value } }) => setRowsPerPage(value);
+
   if (isSearchApplied && reposList.length > 0) {
     return (
       <>
@@ -61,7 +63,7 @@ const Content = ({ isSearchApplied, reposList }) => {
           rowsPerPage={30}
           page={0}
           onChangePage={() => {}}
-          onChangeRowsPerPage={() => {}}
+          onChangeRowsPerPage={handleChangeRowsPerPage}
         />
       </>
     )
@@ -108,5 +110,7 @@ export default Content
 
 Content.propTypes = {
   isSearchApplied: PropTypes.bool.isRequired,
-  reposList: PropTypes.arrayOf(PropTypes.object).isRequired
+  reposList: PropTypes.arrayOf(PropTypes.object).isRequired,
+  rowsPerPage: PropTypes.number.isRequired,
+  setRowsPerPage: PropTypes.func.isRequired
 }

@@ -4,13 +4,8 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 import GithubSearchPage from './github-search-page';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
-import { getReposListBy, getReposPerPage } from '../../__fixtures__/repos';
-
-const makeFakeResponse = (total_count, incomplete_results, items) => ({
-  "total_count": total_count,
-  "incomplete_results": incomplete_results,
-  "items": items
-});
+import { getReposListBy, makeFakeResponse } from '../../__fixtures__/repos';
+import { handlePaginated } from '../../__fixtures__/handlers';
 
 const makeFakeRepo = () => ({
   "id": 363502853,
@@ -25,12 +20,15 @@ const makeFakeRepo = () => ({
   "open_issues_count": 0
 });
 
+const fakeResponse = makeFakeResponse({totalCount: 1});
+
+const fakeRepo = makeFakeRepo()
+
+fakeResponse.items = [fakeRepo]
+
 const server = setupServer(
   rest.get('/search/repositories', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json(makeFakeResponse(1, false, [makeFakeRepo()]))
-    );
+    return res(ctx.status(200), ctx.json(fakeResponse))
   }),
 );
 
@@ -188,17 +186,7 @@ describe('When the user types on filter by and does a search', () => {
 describe('When the developer does a search and selects 50 rows per page', () => {
   it(('must fetch a new search and display 50 rows in the table'), async () => {
     server.use(
-      rest.get('/search/repositories', (req, res, ctx) =>
-        res(
-          ctx.status(200),
-          ctx.json({
-            ...makeFakeResponse(),
-            items: getReposPerPage({
-              perPage: Number(req.url.searchParams.get('per_page')),
-              currentPage: req.url.searchParams.get('page')
-            })
-          })
-        )
+      rest.get('/search/repositories', handlePaginated
       )
     );
     fireClickSearch();
@@ -206,6 +194,10 @@ describe('When the developer does a search and selects 50 rows per page', () => 
     expect(await screen.findAllByRole('row')).toHaveLength(31);
     fireEvent.mouseDown(screen.getByLabelText(/rows per page/i));
     fireEvent.click(screen.getByRole('option', { name: '50' }));
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /search/i})).not.toBeDisabled(),
+      { timeout: 3000 }
+    );
     expect(await screen.findAllByRole('row')).toHaveLength(51);
   });
 });

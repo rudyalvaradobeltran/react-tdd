@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import {
   TextField,
   Typography,
@@ -14,17 +14,28 @@ const GithubSearchPage = () => {
   const [isSearchApplied, setIsSearchApplied] = useState(false);
   const [reposList, setReposList] = useState([]);
   const [searchBy, setSearchBy] = useState('');
+  const [rowsPerPage, setRowsPerPage] = useState(30);
 
-  const handleClick = async () => {
+  const didMount = useRef(false);
+
+  const handleSearch = useCallback(async () => {
     setIsSearching(true);
-    const response = await getRepos({ q: searchBy });
+    const response = await getRepos({ q: searchBy, rowsPerPage });
     const data = await response.json();
     setReposList(data.items);
     setIsSearchApplied(true);
     setIsSearching(false);
-  }
+  }, [rowsPerPage, searchBy])
 
   const handleChange = ({ target: { value }}) => setSearchBy(value);
+
+  useEffect(() => {
+    if (!didMount.current) {
+      didMount.current = true;
+      return;
+    }
+    handleSearch();
+  }, [handleSearch])
 
   return (
     <Container>
@@ -49,14 +60,19 @@ const GithubSearchPage = () => {
             color="primary"
             variant="contained"
             disabled={isSearching}
-            onClick={handleClick}
+            onClick={handleSearch}
           >
             Search
           </Button>
         </Grid>
       </Grid>
 
-      <Content isSearchApplied={isSearchApplied} reposList={reposList} />
+      <Content
+        isSearchApplied={isSearchApplied}
+        reposList={reposList}
+        rowsPerPage={rowsPerPage}
+        setRowsPerPage={setRowsPerPage}
+      />
     </Container>
   )
 }
