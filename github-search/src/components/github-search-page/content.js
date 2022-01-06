@@ -8,8 +8,16 @@ import {
 
 const tableHeaders = ['Repository', 'Stars', 'Forks', 'Open Issues', 'Updated At']
 
-const Content = ({ isSearchApplied, reposList, rowsPerPage, setRowsPerPage }) => {
-  const handleChangeRowsPerPage = ({ target: { value } }) => setRowsPerPage(value);
+const Content = ({
+  isSearchApplied,
+  reposList,
+  rowsPerPage,
+  setRowsPerPage,
+  handleChangePage,
+  totalCount
+}) => {
+  const handleChangeRowsPerPage = ({ target: { value } }) =>
+    setRowsPerPage(value);
 
   if (isSearchApplied && reposList.length > 0) {
     return (
@@ -32,7 +40,7 @@ const Content = ({ isSearchApplied, reposList, rowsPerPage, setRowsPerPage }) =>
                 open_issues_count,
                 updated_at,
                 html_url,
-                owner: {avatar_url},
+                owner: { avatar_url },
               }) => (
                 <tr key={id}>
                   <td>
@@ -59,14 +67,14 @@ const Content = ({ isSearchApplied, reposList, rowsPerPage, setRowsPerPage }) =>
         <TablePagination
           rowsPerPageOptions={[30, 50, 100]}
           component="div"
-          count={1}
+          count={totalCount}
           rowsPerPage={30}
           page={0}
-          onChangePage={() => {}}
+          onChangePage={handleChangePage}
           onChangeRowsPerPage={handleChangeRowsPerPage}
         />
       </>
-    )
+    );
   }
 
   if (isSearchApplied && reposList.length === 0) {
@@ -77,11 +85,9 @@ const Content = ({ isSearchApplied, reposList, rowsPerPage, setRowsPerPage }) =>
         justifyContent="center"
         height={400}
       >
-        <Typography>
-          Your search has no results 
-        </Typography>
+        <Typography>Your search has no results</Typography>
       </Box>
-    )
+    );
   }
 
   if (isSearchApplied && reposList.length === 0) {
@@ -92,19 +98,17 @@ const Content = ({ isSearchApplied, reposList, rowsPerPage, setRowsPerPage }) =>
         justifyContent="center"
         height={400}
       >
-        <Typography>
-          Your search has no results 
-        </Typography>
+        <Typography>Your search has no results</Typography>
       </Box>
-    )
+    );
   }
 
   return (
     <Typography>
       Please provide a search option and click in the search button
     </Typography>
-  )
-}
+  );
+};
 
 export default Content
 
@@ -112,5 +116,6 @@ Content.propTypes = {
   isSearchApplied: PropTypes.bool.isRequired,
   reposList: PropTypes.arrayOf(PropTypes.object).isRequired,
   rowsPerPage: PropTypes.number.isRequired,
-  setRowsPerPage: PropTypes.func.isRequired
+  setRowsPerPage: PropTypes.func.isRequired,
+  handleChangePage: PropTypes.func.isRequired
 }

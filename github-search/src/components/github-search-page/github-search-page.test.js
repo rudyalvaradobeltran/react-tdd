@@ -186,7 +186,7 @@ describe('When the user types on filter by and does a search', () => {
   })
 });
 
-describe('When the developer does a search and selects 50 rows per page', () => {
+describe('When the user does a search and selects 50 rows per page', () => {
   it(('must fetch a new search and display 50 rows in the table'), async () => {
     server.use(
       rest.get('/search/repositories', handlePaginated
@@ -203,4 +203,25 @@ describe('When the developer does a search and selects 50 rows per page', () => 
     );
     expect(await screen.findAllByRole('row')).toHaveLength(51);
   });
+});
+
+describe('When the user clicks on search and then on next page button', () => {
+  it(('must display the next repositories page'), async () => {
+    server.use(
+      rest.get('/search/repositories', handlePaginated
+      )
+    );
+    fireClickSearch();
+    expect(await screen.findByRole('table')).toBeInTheDocument();
+    // next possibly failing because of timeout
+    expect(screen.getByRole('cell', { name: /1-0/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /next page/i })).not.toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: /next page/i }));
+    expect(screen.getByRole('button', { name: /search/i })).toBeDisabled();
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /search/i })).not.toBeDisabled(),
+      { timeout: 3000 }
+    );
+    expect(screen.getByRole('cell', { name: /2-0/ })).toBeInTheDocument();
+  }, 10000);
 });
