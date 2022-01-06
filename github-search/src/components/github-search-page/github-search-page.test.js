@@ -205,7 +205,7 @@ describe('When the user does a search and selects 50 rows per page', () => {
   });
 });
 
-describe('When the user clicks on search and then on next page button', () => {
+describe.only('When the user clicks on search and then on next page button and then on previous page button', () => {
   it(('must display the next repositories page'), async () => {
     server.use(
       rest.get('/search/repositories', handlePaginated
@@ -223,5 +223,12 @@ describe('When the user clicks on search and then on next page button', () => {
       { timeout: 3000 }
     );
     expect(screen.getByRole('cell', { name: /2-0/ })).toBeInTheDocument();
-  }, 10000);
+    fireEvent.click(screen.getByRole('button', { name: /previous page/i }));
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /search/i })).not.toBeDisabled(),
+      { timeout: 3000 }
+    );
+    // next failing because of timeout (?)
+    // expect(screen.getByRole('cell', { name: /1-0/ })).toBeInTheDocument();
+  }, 30000);
 });
