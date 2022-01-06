@@ -61,12 +61,15 @@ describe('when GithubSearchPage is mounted', () => {
 describe('when user does a search', () => {
   it('search button must be disabled until search is done', async () => {
     expect(screen.getByRole('button', { name: /search/i })).not.toBeDisabled();
+    fireEvent.change(screen.getByLabelText(/filter by/i),
+      { target: { value: 'test' } 
+    });
+    expect(screen.getByRole('button', { name: /search/i })).not.toBeDisabled();
     fireClickSearch();
-    expect(screen.getByRole('button', { name: /search/i })).toBeDisabled();
+    expect(screen.getByRole('button')).toBeDisabled();
     await waitFor(() => 
       expect(screen.getByRole('button', { name: /search/i })).not.toBeDisabled()
     );
-    expect(screen.getByRole('table')).toBeInTheDocument();
   });
   it('data should be displayed as a sticky table', async () => {
     fireClickSearch();

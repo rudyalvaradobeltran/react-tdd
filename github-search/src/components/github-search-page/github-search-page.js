@@ -13,21 +13,19 @@ const GithubSearchPage = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [isSearchApplied, setIsSearchApplied] = useState(false);
   const [reposList, setReposList] = useState([]);
-  const [searchBy, setSearchBy] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(30);
 
   const didMount = useRef(false);
+  const searchByInput = useRef(null);
 
   const handleSearch = useCallback(async () => {
     setIsSearching(true);
-    const response = await getRepos({ q: searchBy, rowsPerPage });
+    const response = await getRepos({ q: searchByInput.current.value, rowsPerPage });
     const data = await response.json();
     setReposList(data.items);
     setIsSearchApplied(true);
     setIsSearching(false);
-  }, [rowsPerPage, searchBy])
-
-  const handleChange = ({ target: { value }}) => setSearchBy(value);
+  }, [rowsPerPage])
 
   useEffect(() => {
     if (!didMount.current) {
@@ -48,10 +46,10 @@ const GithubSearchPage = () => {
       <Grid container spacing={2} justify="space-between">
         <Grid item md={6} xs={12}>
           <TextField
-            id="filterBy"
-            value={searchBy}
+            inputRef={searchByInput}
+            fullwidth
             label="Filter by"
-            onChange={handleChange}
+            id="filterBy"
           />
         </Grid>
         <Grid item md={6} xs={12}>
