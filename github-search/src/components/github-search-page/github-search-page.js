@@ -6,7 +6,7 @@ import {
   Container,
   Grid,
 } from '@material-ui/core';
-import Content from './content';
+import Content from '../content';
 import { getRepos } from '../../services';
 
 const GithubSearchPage = () => {

@@ -1,11 +1,12 @@
 import React from 'react'
-import GithubSearchPage from './components/github-search-page/github-search-page'
+import { GithubSearchPage } from './components/github-search-page'
+import { ErrorBoundary } from './components/error-boundary'
 
 function App() {
   return (
-    <div>
+    <ErrorBoundary>
       <GithubSearchPage />
-    </div>
+    </ErrorBoundary>
   );
 }
 

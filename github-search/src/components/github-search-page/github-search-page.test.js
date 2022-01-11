@@ -205,7 +205,7 @@ describe('When the user does a search and selects 50 rows per page', () => {
   });
 });
 
-describe.only('When the user clicks on search and then on next page button and then on previous page button', () => {
+describe('When the user clicks on search and then on next page button and then on previous page button', () => {
   it(('must display the next repositories page'), async () => {
     server.use(
       rest.get('/search/repositories', handlePaginated
