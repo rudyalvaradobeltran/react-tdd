@@ -14,11 +14,9 @@ const Content = ({
   rowsPerPage,
   setRowsPerPage,
   handleChangePage,
-  totalCount
+  totalCount,
+  handleChangeRowsPerPage
 }) => {
-  const handleChangeRowsPerPage = ({ target: { value } }) =>
-    setRowsPerPage(value);
-
   if (isSearchApplied && reposList.length > 0) {
     return (
       <>
@@ -117,5 +115,6 @@ Content.propTypes = {
   reposList: PropTypes.arrayOf(PropTypes.object).isRequired,
   rowsPerPage: PropTypes.number.isRequired,
   setRowsPerPage: PropTypes.func.isRequired,
-  handleChangePage: PropTypes.func.isRequired
+  handleChangePage: PropTypes.func.isRequired,
+  handleChangeRowsPerPage: PropTypes.func.isRequired
 }

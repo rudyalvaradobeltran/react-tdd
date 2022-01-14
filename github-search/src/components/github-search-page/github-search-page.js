@@ -23,6 +23,14 @@ const GithubSearchPage = () => {
   const didMount = useRef(false);
   const searchByInput = useRef(null);
 
+  const handleClickSearch = () => {
+    if(currentPage === 0) {
+      handleSearch();
+      return;
+    }
+    setCurrentPage(0);
+  }
+
   const handleSearch = useCallback(async () => {
     try {
       setIsSearching(true);
@@ -47,6 +55,11 @@ const GithubSearchPage = () => {
       setIsSearching(false);
     }
   }, [rowsPerPage, currentPage]);
+
+  const handleChangeRowsPerPage = ({ target: { value }}) => {
+    setCurrentPage(0);
+    setRowsPerPage(value);
+  };
 
   const handleChangePage = (e, newPage) => {
     setCurrentPage(newPage);
@@ -80,7 +93,7 @@ const GithubSearchPage = () => {
             color="primary"
             variant="contained"
             disabled={isSearching}
-            onClick={handleSearch}
+            onClick={handleClickSearch}
           >
             Search
           </Button>
@@ -94,6 +107,7 @@ const GithubSearchPage = () => {
         setRowsPerPage={setRowsPerPage}
         handleChangePage={handleChangePage}
         totalCount={totalCount}
+        handleChangeRowsPerPage={handleChangeRowsPerPage}
       />
       <Snackbar
         anchorOrigin={{
