@@ -5,6 +5,7 @@ import {
   Button,
   Container,
   Grid,
+  Snackbar
 } from '@material-ui/core';
 import Content from '../content';
 import { getRepos } from '../../services';
@@ -16,22 +17,32 @@ const GithubSearchPage = () => {
   const [rowsPerPage, setRowsPerPage] = useState(30);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
 
   const didMount = useRef(false);
   const searchByInput = useRef(null);
 
   const handleSearch = useCallback(async () => {
-    setIsSearching(true);
-    const response = await getRepos({
-      q: searchByInput.current.value,
-      rowsPerPage,
-      currentPage
-    });
-    const data = await response.json();
-    setReposList(data.items);
-    setTotalCount(data.total_count);
-    setIsSearchApplied(true);
-    setIsSearching(false);
+    try {
+      setIsSearching(true);
+      const response = await getRepos({
+        q: searchByInput.current.value,
+        rowsPerPage,
+        currentPage
+      });
+      if (!response.ok) {
+        throw response;
+      }
+      const data = await response.json();
+      setReposList(data.items);
+      setTotalCount(data.total_count);
+      setIsSearchApplied(true);
+      setIsSearching(false);
+    } catch (error) {
+      setIsOpen(true);
+    } finally {
+      setIsSearching(false);
+    }
   }, [rowsPerPage, currentPage]);
 
   const handleChangePage = (e, newPage) => {
@@ -80,6 +91,16 @@ const GithubSearchPage = () => {
         setRowsPerPage={setRowsPerPage}
         handleChangePage={handleChangePage}
         totalCount={totalCount}
+      />
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'center'
+        }}
+        open={isOpen}
+        autoHideDuration={6000}
+        onClose={() => setIsOpen(false)}
+        message="Validation failed"
       />
     </Container>
   );
