@@ -5,7 +5,7 @@ import {
   screen,
   fireEvent,
   waitFor,
-  within,
+  within
 } from "@testing-library/react";
 import GithubSearchPage from "./github-search-page";
 import { rest } from "msw";
@@ -16,7 +16,6 @@ import {
   makeFakeError,
   makeFakeRepo,
 } from "../../__fixtures__/repos";
-import { handlePaginated } from "../../__fixtures__/handlers";
 
 const fakeResponse = makeFakeResponse({ totalCount: 1 });
 
@@ -29,16 +28,6 @@ const server = setupServer(
     return res(ctx.status(200), ctx.json(fakeResponse));
   })
 );
-
-const awaitSearch = async () => {
-  await waitFor(
-    () =>
-      expect(
-        screen.getByRole("button", { name: /search/i })
-      ).not.toBeDisabled(),
-    { timeout: 3000 }
-  );
-}
 
 beforeAll(() => server.listen());
 
@@ -210,48 +199,28 @@ describe("When the user types on filter by and does a search", () => {
   });
 });
 
-describe("When the user does a search and selects 50 rows per page", () => {
-  it("must fetch a new search and display 50 rows in the table", async () => {
-    server.use(rest.get("/search/repositories", handlePaginated));
-    fireClickSearch();
-    expect(await screen.findByRole("table")).toBeInTheDocument();
-    expect(await screen.findAllByRole("row")).toHaveLength(31);
-    fireEvent.mouseDown(screen.getByLabelText(/rows per page/i));
-    fireEvent.click(screen.getByRole("option", { name: "50" }));
-    await awaitSearch();
-    expect(await screen.findAllByRole("row")).toHaveLength(51);
-  });
-});
-
-describe("When the user clicks on search and then on next page button and then on previous page button", () => {
-  it.skip("must display the next repositories page", async () => {
-    server.use(rest.get("/search/repositories", handlePaginated));
-    fireClickSearch();
-    expect(await screen.findByRole("table")).toBeInTheDocument();
-    // next possibly failing because of timeout
-    expect(screen.getByRole("cell", { name: /1-0/ })).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /next page/i })
-    ).not.toBeDisabled();
-    fireEvent.click(screen.getByRole("button", { name: /next page/i }));
-    expect(screen.getByRole("button", { name: /search/i })).toBeDisabled();
-    await awaitSearch();
-    expect(screen.getByRole("cell", { name: /2-0/ })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /previous page/i }));
-    await awaitSearch();
-    // next failing because of timeout (?)
-    // expect(screen.getByRole('cell', { name: /1-0/ })).toBeInTheDocument();
-  }, 30000);
-});
-
-describe("When there is an unexpected error from the backend", () => {
+describe("When there is an unprocessable entity from the backend (422)", () => {
   it("must display an alert message error with the message from the service", async () => {
+    expect(screen.queryByText(/validation failed/i)).not.toBeInTheDocument();
     server.use(
       rest.get("/search/repositories", (req, res, ctx) =>
-        res(ctx.status(422), ctx.json(...makeFakeError()))
+        res(ctx.status(422), ctx.json(makeFakeError()))
       )
     );
     fireClickSearch();
     expect(await screen.findByText(/validation failed/i)).toBeVisible();
+  });
+});
+
+describe("When there is an unexpected error from the backend (500)", () => {
+  it("must display an alert message error with the message from the service", async () => {
+    expect(screen.queryByText(/unexpected error/i)).not.toBeInTheDocument();
+    server.use(
+      rest.get("/search/repositories", (req, res, ctx) =>
+        res(ctx.status(500), ctx.json(makeFakeError({ message: 'Unexpected error' })))
+      )
+    );
+    fireClickSearch();
+    expect(await screen.findByText(/unexpected error/i)).toBeVisible();
   });
 });

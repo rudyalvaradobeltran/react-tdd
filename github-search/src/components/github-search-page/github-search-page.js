@@ -18,6 +18,7 @@ const GithubSearchPage = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const didMount = useRef(false);
   const searchByInput = useRef(null);
@@ -39,7 +40,9 @@ const GithubSearchPage = () => {
       setIsSearchApplied(true);
       setIsSearching(false);
     } catch (error) {
+      const data = await error.json();
       setIsOpen(true);
+      setErrorMessage(data.message);
     } finally {
       setIsSearching(false);
     }
@@ -100,7 +103,7 @@ const GithubSearchPage = () => {
         open={isOpen}
         autoHideDuration={6000}
         onClose={() => setIsOpen(false)}
-        message="Validation failed"
+        message={errorMessage}
       />
     </Container>
   );

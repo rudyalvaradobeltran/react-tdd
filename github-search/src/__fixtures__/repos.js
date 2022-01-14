@@ -45,4 +45,5 @@ export default {
   makeFakeRepo,
   getReposListBy,
   getReposPerPage,
+  makeFakeError
 }
