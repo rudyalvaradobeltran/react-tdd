@@ -1,10 +1,22 @@
 import React from 'react';
-import { screen, render, fireEvent } from '@testing-library/react';
+import { screen, render, fireEvent, waitFor } from '@testing-library/react';
+import { setupServer } from 'msw/node';
 import LoginPage from './login-page';
+import { handlers } from '../../../mocks/handlers';
 
 const passwordValidationMessage = 'The password must contain at least 8 characters, one upper case letter, one number and one special character';
 
+const server = setupServer(...handlers);
+
 const getPasswordInput = () => screen.getByLabelText(/password/i);
+
+const getSendButton = () => screen.getByRole('button', { name: /send/i });
+
+beforeAll(() => server.listen());
+
+afterEach(() => server.resetHandlers());
+
+afterAll(() => server.close());
 
 beforeEach(() => render(<LoginPage />));
 
@@ -26,6 +38,7 @@ describe('When the user leaves empty fields and clicks the submit button', () =>
     fireEvent.click(screen.getByRole('button', { name: /send/i }));
     expect(screen.getByText(/the email is required/i)).toBeInTheDocument();
     expect(screen.getByText(/the password is required/i)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('button', { name: /send/i })).not.toBeDisabled());
   });
 });
 
@@ -36,6 +49,7 @@ describe('When the user fills the fields and clicks the submit button', () => {
     fireEvent.click(screen.getByRole('button', { name: /send/i }));
     expect(screen.queryByText(/the email is required/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/the password is required/i)).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('button', { name: /send/i })).not.toBeDisabled());
   });
 });
 
@@ -86,12 +100,31 @@ describe('When the user fills and blur the password input without one special ch
   });
 });
 
-/*
-describe('when the user submit the login form with valid data', () => {
+describe('When the user submit the login form with valid data', () => {
   it('must disable the submit button while the form page is fetching the data', async () => {
+    fireEvent.click(getSendButton());
+    expect(getSendButton()).toBeDisabled();
+    await waitFor(() => expect(getSendButton()).not.toBeDisabled());
     
+    // fillInputs()
+
+    // fireEvent.click(getSendButton())
+
+    // expect(getSendButton()).toBeDisabled()
+
+    // await waitFor(() => expect(getSendButton()).not.toBeDisabled())
   });
-  it('must be a loading indicator at the top of the form while it is fetching', async () => {
-    
-  });
-});*/
+  // it('must be a loading indicator at the top of the form while it is fetching', async () => {
+  //   expect(screen.queryByTestId('loading-indicator')).not.toBeInTheDocument()
+
+  //   fillInputs()
+
+  //   fireEvent.click(getSendButton())
+
+  //   expect(screen.getByTestId('loading-indicator')).toBeInTheDocument()
+
+  //   await waitForElementToBeRemoved(() =>
+  //     screen.queryByTestId('loading-indicator'),
+  //   )
+  // });
+});
