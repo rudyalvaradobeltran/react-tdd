@@ -12,6 +12,11 @@ const getPasswordInput = () => screen.getByLabelText(/password/i);
 
 const getSendButton = () => screen.getByRole('button', { name: /send/i });
 
+const fillInputsWithValidValues = () => {
+  fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'john.doe@test.com' } });
+  fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'mySecurePassword666' } });
+}
+
 beforeAll(() => server.listen());
 
 afterEach(() => server.resetHandlers());
@@ -44,12 +49,11 @@ describe('When the user leaves empty fields and clicks the submit button', () =>
 
 describe('When the user fills the fields and clicks the submit button', () => {
   it('must not display the required messages"', async () => {
-    screen.getByLabelText(/email/i).value = 'john.doe@test.com';
-    screen.getByLabelText(/password/i).value = 'mySecurePassword666';
-    fireEvent.click(screen.getByRole('button', { name: /send/i }));
+    fillInputsWithValidValues();
+    fireEvent.click(getSendButton());
     expect(screen.queryByText(/the email is required/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/the password is required/i)).not.toBeInTheDocument();
-    await waitFor(() => expect(screen.getByRole('button', { name: /send/i })).not.toBeDisabled());
+    await waitFor(() => expect(getSendButton()).not.toBeDisabled());
   });
 });
 
@@ -102,12 +106,14 @@ describe('When the user fills and blur the password input without one special ch
 
 describe('When the user submit the login form with valid data', () => {
   it('must disable the submit button while the form page is fetching the data', async () => {
+    fillInputsWithValidValues();
     fireEvent.click(getSendButton());
     expect(getSendButton()).toBeDisabled();
     await waitFor(() => expect(getSendButton()).not.toBeDisabled());
   });
   it('must be a loading indicator at the top of the form while it is fetching', async () => {
     expect(screen.queryByTestId('loading-indicator')).not.toBeInTheDocument();
+    fillInputsWithValidValues();
     fireEvent.click(getSendButton());
     expect(screen.queryByTestId('loading-indicator')).toBeInTheDocument();
     await waitForElementToBeRemoved(() => screen.queryByTestId('loading-indicator'));
