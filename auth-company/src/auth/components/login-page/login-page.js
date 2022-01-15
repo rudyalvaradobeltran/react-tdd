@@ -7,6 +7,11 @@ export const validateEmail = email => {
   return regex.test(email);
 }
 
+export const validatePassword = password => {
+  const passwordRulesRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/
+  return passwordRulesRegex.test(password)
+}
+
 const LoginPage = () => {
   const [emailValidationMessage, setEmailValidationMessage] = useState('');
   const [passwordValidationMessage, setPasswordValidationMessage] = useState('');
@@ -30,7 +35,17 @@ const LoginPage = () => {
   const handleBlurEmail = () => {
     if (!validateEmail(formValues.email)) {
       setEmailValidationMessage('The email is invalid');
+      return;
     }
+    setEmailValidationMessage('');
+  }
+
+  const handleBlurPassword = () => {
+    if (!validatePassword(formValues.password)) {
+      setPasswordValidationMessage('The password must contain at least 8 characters, one upper case letter, one number and one special character');
+      return;
+    }
+    setPasswordValidationMessage('');
   }
 
   return (
@@ -42,7 +57,7 @@ const LoginPage = () => {
           id="email"
           name="email"
           helperText={emailValidationMessage}
-          handleChange={handleChange}
+          onChange={handleChange}
           value={formValues.email}
           onBlur={handleBlurEmail}
         />
@@ -52,8 +67,9 @@ const LoginPage = () => {
           type="password"
           name="password"
           helperText={passwordValidationMessage}
-          handleChange={handleChange}
+          onChange={handleChange}
           value={formValues.password}
+          onBlur={handleBlurPassword}
         />
         <Button type="submit">Send</Button>
       </form>
