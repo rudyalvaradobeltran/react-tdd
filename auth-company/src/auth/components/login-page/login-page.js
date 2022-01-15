@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 export const validateEmail = email => {
   const regex = /^([A-Za-z0-9_\-.])+@([A-Za-z0-9_\-.])+\.([A-Za-z]{2,4})$/;
@@ -55,6 +56,7 @@ const LoginPage = () => {
   return (
     <>
       <h1>Login page</h1>
+      {isFetching && <CircularProgress data-testid="loading-indicator" />}
       <form onSubmit={handleSubmit}>
         <TextField
           label="email"

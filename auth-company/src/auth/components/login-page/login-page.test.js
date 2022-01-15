@@ -1,5 +1,5 @@
 import React from 'react';
-import { screen, render, fireEvent, waitFor } from '@testing-library/react';
+import { screen, render, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import { setupServer } from 'msw/node';
 import LoginPage from './login-page';
 import { handlers } from '../../../mocks/handlers';
@@ -105,26 +105,11 @@ describe('When the user submit the login form with valid data', () => {
     fireEvent.click(getSendButton());
     expect(getSendButton()).toBeDisabled();
     await waitFor(() => expect(getSendButton()).not.toBeDisabled());
-    
-    // fillInputs()
-
-    // fireEvent.click(getSendButton())
-
-    // expect(getSendButton()).toBeDisabled()
-
-    // await waitFor(() => expect(getSendButton()).not.toBeDisabled())
   });
-  // it('must be a loading indicator at the top of the form while it is fetching', async () => {
-  //   expect(screen.queryByTestId('loading-indicator')).not.toBeInTheDocument()
-
-  //   fillInputs()
-
-  //   fireEvent.click(getSendButton())
-
-  //   expect(screen.getByTestId('loading-indicator')).toBeInTheDocument()
-
-  //   await waitForElementToBeRemoved(() =>
-  //     screen.queryByTestId('loading-indicator'),
-  //   )
-  // });
+  it('must be a loading indicator at the top of the form while it is fetching', async () => {
+    expect(screen.queryByTestId('loading-indicator')).not.toBeInTheDocument();
+    fireEvent.click(getSendButton());
+    expect(screen.queryByTestId('loading-indicator')).toBeInTheDocument();
+    await waitForElementToBeRemoved(() => screen.queryByTestId('loading-indicator'));
+  });
 });
