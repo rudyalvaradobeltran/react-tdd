@@ -1,9 +1,12 @@
 import React from 'react';
-import LoginPage from './auth/components/login-page/login-page';
+import { BrowserRouter as Router } from 'react-router-dom';
+import AppRouter from './app-router';
 
 const App = () => {
   return(
-    <LoginPage />
+    <Router>
+      <AppRouter />
+    </Router>
   )
 }
 export default App;

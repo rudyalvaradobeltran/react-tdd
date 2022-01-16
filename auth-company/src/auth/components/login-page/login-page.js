@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Redirect } from 'react-router-dom';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -22,6 +23,7 @@ const LoginPage = () => {
   const [isFetching, setIsFetching] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [user, setUser] = useState({ role: '' });
 
   const validateForm = () => {
     const { email, password } = formValues;
@@ -46,6 +48,8 @@ const LoginPage = () => {
       if (!response.ok) {
         throw response;
       }
+      const { user: { role }} = await response.json();
+      setUser({ role });
     } catch (error) {
       const data = await error.json();
       setErrorMessage(data.message);
@@ -76,6 +80,10 @@ const LoginPage = () => {
   }
 
   const handleClose = () => setIsOpen(false);
+
+  if (user.role) {
+    return <Redirect to="/admin" />
+  }
 
   return (
     <>
