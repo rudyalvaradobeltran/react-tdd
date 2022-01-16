@@ -1,8 +1,9 @@
 import React from 'react';
 import { screen, render, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
-import { rest, setupServer } from 'msw/node';
+import { setupServer } from 'msw/node';
+import { rest } from 'msw';
 import LoginPage from './login-page';
-import { handlers } from '../../../mocks/handlers';
+import { handlers, handleInvalidCredentials } from '../../../mocks/handlers';
 
 const passwordValidationMessage = 'The password must contain at least 8 characters, one upper case letter, one number and one special character';
 
@@ -12,9 +13,9 @@ const getPasswordInput = () => screen.getByLabelText(/password/i);
 
 const getSendButton = () => screen.getByRole('button', { name: /send/i });
 
-const fillInputsWithValidValues = () => {
-  fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'john.doe@test.com' } });
-  fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'mySecurePassword666' } });
+const fillInputs = ({ email = 'john.doe@test.com', password = 'mySecurePassword666' } = {}) => {
+  fireEvent.change(screen.getByLabelText(/email/i), { target: { value: email } });
+  fireEvent.change(screen.getByLabelText(/password/i), { target: { value: password } });
 }
 
 beforeAll(() => server.listen());
@@ -49,7 +50,7 @@ describe('When the user leaves empty fields and clicks the submit button', () =>
 
 describe('When the user fills the fields and clicks the submit button', () => {
   it('must not display the required messages"', async () => {
-    fillInputsWithValidValues();
+    fillInputs();
     fireEvent.click(getSendButton());
     expect(screen.queryByText(/the email is required/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/the password is required/i)).not.toBeInTheDocument();
@@ -106,14 +107,14 @@ describe('When the user fills and blur the password input without one special ch
 
 describe('When the user submit the login form with valid data', () => {
   it('must disable the submit button while the form page is fetching the data', async () => {
-    fillInputsWithValidValues();
+    fillInputs();
     fireEvent.click(getSendButton());
     expect(getSendButton()).toBeDisabled();
     await waitFor(() => expect(getSendButton()).not.toBeDisabled());
   });
   it('must be a loading indicator at the top of the form while it is fetching', async () => {
     expect(screen.queryByTestId('loading-indicator')).not.toBeInTheDocument();
-    fillInputsWithValidValues();
+    fillInputs();
     fireEvent.click(getSendButton());
     expect(screen.queryByTestId('loading-indicator')).toBeInTheDocument();
     await waitForElementToBeRemoved(() => screen.queryByTestId('loading-indicator'));
@@ -130,14 +131,26 @@ describe('When the user submit the login form with valid data and there is an un
         ),
       ),
     );
-    fillInputsWithValidValues();
+    expect(
+      screen.queryByText(/unexpected error, please try again/i),
+    ).not.toBeInTheDocument();
+    fillInputs();
     fireEvent.click(getSendButton());
     expect(
       await screen.findByText(/unexpected error, please try again/i),
     ).toBeInTheDocument();
-  })
-})
+  });
+});
 
 describe('When the user submit the login form with valid data and there is an invalid credentials error', () => {
-  it.todo('must display the error message "The email or password are not correct" from the api');
-})
+  it('must display the error message "The email or password are not correct" from the api', async () => {
+    const wrongEmail = 'wrong.email@gob.cl';
+    const wrongPassword = 'wrongPass!1';
+    server.use(handleInvalidCredentials({ wrongEmail, wrongPassword }));
+    fillInputs({ email: wrongEmail, password: wrongPassword });
+    fireEvent.click(getSendButton());
+    expect(
+      await screen.findByText(/the email or password are not correct/i),
+    ).toBeInTheDocument();
+  });
+});
