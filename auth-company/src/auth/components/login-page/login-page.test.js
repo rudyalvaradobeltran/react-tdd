@@ -1,22 +1,17 @@
 import React from 'react';
-import { screen, render, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import { screen, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
 import LoginPage from './login-page';
 import { handlers, handleInvalidCredentials } from '../../../mocks/handlers';
+import { renderWithRouter, fillInputs, getSendButton } from '../../../utils/tests';
+import { AuthContext } from '../../../utils/contexts/auth-context';
 
 const passwordValidationMessage = 'The password must contain at least 8 characters, one upper case letter, one number and one special character';
 
-const server = setupServer(...handlers);
-
 const getPasswordInput = () => screen.getByLabelText(/password/i);
 
-const getSendButton = () => screen.getByRole('button', { name: /send/i });
-
-const fillInputs = ({ email = 'john.doe@test.com', password = 'mySecurePassword666' } = {}) => {
-  fireEvent.change(screen.getByLabelText(/email/i), { target: { value: email } });
-  fireEvent.change(screen.getByLabelText(/password/i), { target: { value: password } });
-}
+const server = setupServer(...handlers);
 
 beforeAll(() => server.listen());
 
@@ -24,7 +19,15 @@ afterEach(() => server.resetHandlers());
 
 afterAll(() => server.close());
 
-beforeEach(() => render(<LoginPage />));
+beforeEach(() =>
+  renderWithRouter(
+    <AuthContext.Provider
+      value={{ handleSuccessLogin: jest.fn(), user: {role: ''} }}
+    >
+      <LoginPage />
+    </AuthContext.Provider>,
+  ),
+)
 
 describe('When login page is mounted', () => {
   it('must display the login title', () => {

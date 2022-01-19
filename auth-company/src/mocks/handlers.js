@@ -3,7 +3,12 @@ import { rest } from 'msw';
 export const handlers = [
   rest.post('/login', (req, res, ctx) => {
     sessionStorage.setItem('is-authenticated', true);
-    return res(ctx.status(200), ctx.json({ user: { role: 'admin' }}));
+    let role = '';
+    const { email } = req.body;
+    if (email === 'admin@email.com') {
+      role = 'admin';
+    }
+    return res(ctx.status(200), ctx.json({ user: { role }}));
   }),
 ];
 

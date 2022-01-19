@@ -44,7 +44,7 @@ describe('When the user is authenticated and enters into the admin page', () => 
 describe('When the admin is authenticated in login page', () => {
   it('must be redirected to admin page', async () => {
     renderWithRouter(<AppRouter />);
-    fillInputs();
+    fillInputs({ email: 'admin@email.com' });
     fireEvent.click(getSendButton());
     expect(await screen.findByText(/admin page/i)).toBeInTheDocument();
   });
