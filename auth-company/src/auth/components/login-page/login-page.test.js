@@ -27,7 +27,7 @@ beforeEach(() =>
       <LoginPage />
     </AuthContext.Provider>,
   ),
-)
+);
 
 describe('When login page is mounted', () => {
   it('must display the login title', () => {

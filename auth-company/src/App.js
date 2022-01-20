@@ -1,12 +1,13 @@
 import React from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
-import AppRouter from './app-router';
+import { AppRouter } from './app-router';
+import { AuthGuard } from './utils/components/auth-guard';
 
 const App = () => {
-  return(
-    <Router>
+  return (
+    <AuthGuard>
       <AppRouter />
-    </Router>
+    </AuthGuard>
   )
 }
+
 export default App;

@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { AuthGuard } from './components/auth-guard';
@@ -20,10 +21,7 @@ export const renderWithAuthProvider = (ui, {isAuth = false, role = ''} = {}) => 
 
 export const goTo = route => window.history.pushState({}, 'Test page', route);
 
-export const fillInputs = ({
-  email = 'john.doe@test.com',
-  password = 'suckMyDuck!666',
-} = {}) => {
+export const fillInputs = ({ email = 'john.doe@test.com', password = 'suckMyDick!666' } = {}) => {
   fireEvent.change(screen.getByLabelText(/email/i), {
     target: {value: email},
   });

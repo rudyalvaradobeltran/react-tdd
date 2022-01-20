@@ -1,30 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
+import { AuthContext } from '../../../utils/contexts/auth-context';
 import { Redirect } from 'react-router-dom';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Snackbar from '@material-ui/core/Snackbar';
 import { login } from '../../services/index';
-
-export const validateEmail = email => {
-  const regex = /^([A-Za-z0-9_\-.])+@([A-Za-z0-9_\-.])+\.([A-Za-z]{2,4})$/;
-  return regex.test(email);
-}
-
-export const validatePassword = password => {
-  const passwordRulesRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/
-  return passwordRulesRegex.test(password)
-}
+import { validateEmail, validatePassword } from '../../../utils/helpers';
 
 const LoginPage = ({ onSuccessLogin }) => {
+  const {handleSuccessLogin, user} = useContext(AuthContext)
   const [emailValidationMessage, setEmailValidationMessage] = useState('');
   const [passwordValidationMessage, setPasswordValidationMessage] = useState('');
   const [formValues, setFormValues] = useState({email: '', password: ''});
   const [isFetching, setIsFetching] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [user, setUser] = useState({role: ''});
 
   const validateForm = () => {
     const {email, password} = formValues;
@@ -51,11 +43,8 @@ const LoginPage = ({ onSuccessLogin }) => {
       if (!response.ok) {
         throw response;
       }
-      const {
-        user: {role},
-      } = await response.json();
-      setUser({role});
-      onSuccessLogin();
+      const { user: {role, username} } = await response.json();
+      handleSuccessLogin({ role, username });
     } catch (error) {
       const data = await error.json();
       setErrorMessage(data.message);
@@ -86,10 +75,14 @@ const LoginPage = ({ onSuccessLogin }) => {
     setPasswordValidationMessage('')
   }
 
-  const handleClose = () => setIsOpen(false)
+  const handleClose = () => setIsOpen(false);
 
   if (!isFetching && user.role === 'admin') {
     return <Redirect to="/admin" />;
+  }
+
+  if (!isFetching && user.role === 'employee') {
+    return <Redirect to="/employee" />;
   }
 
   return (
@@ -101,20 +94,24 @@ const LoginPage = ({ onSuccessLogin }) => {
           label="email"
           id="email"
           name="email"
+          required
           helperText={emailValidationMessage}
           onChange={handleChange}
           value={formValues.email}
           onBlur={handleBlurEmail}
+          error={!!emailValidationMessage}
         />
         <TextField
           label="password"
           id="password"
           type="password"
           name="password"
+          required
           helperText={passwordValidationMessage}
           onChange={handleChange}
           value={formValues.password}
           onBlur={handleBlurPassword}
+          error={!!passwordValidationMessage}
         />
         <Button disabled={isFetching} type="submit">Send</Button>
       </form>

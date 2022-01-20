@@ -1,14 +1,21 @@
 import { rest } from 'msw';
+import {
+  ADMIN_EMAIL,
+  EMPLOYEE_EMAIL,
+} from '../consts';
 
 export const handlers = [
   rest.post('/login', (req, res, ctx) => {
     sessionStorage.setItem('is-authenticated', true);
     let role = '';
     const { email } = req.body;
-    if (email === 'admin@email.com') {
+    if (email === ADMIN_EMAIL) {
       role = 'admin';
     }
-    return res(ctx.status(200), ctx.json({ user: { role }}));
+    if (email === EMPLOYEE_EMAIL) {
+      role = 'employee'
+    }
+    return res(ctx.status(200), ctx.json({user: {role, username: 'John Doe'}}));
   }),
 ];
 
@@ -25,6 +32,5 @@ export const handleInvalidCredentials = ({ wrongEmail, wrongPassword }) => {
   });
 }
 
-const handleExports = { handlers, handleInvalidCredentials };
-
-export default handleExports;
+// eslint-disable-next-line import/no-anonymous-default-export
+export default { handlers, handleInvalidCredentials };
