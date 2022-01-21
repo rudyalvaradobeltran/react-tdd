@@ -26,6 +26,10 @@ PrivateRoute.propTypes = {
   allowRoles: PropTypes.arrayOf(PropTypes.string)
 };
 
+PrivateRoute.defaultProps = {
+  allowRoles: [],
+}
+
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
   PrivateRoute

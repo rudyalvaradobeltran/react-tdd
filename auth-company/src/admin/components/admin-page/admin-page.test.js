@@ -4,7 +4,7 @@ import { AdminPage } from './admin-page';
 import { AuthContext } from '../../../utils/contexts/auth-context';
 import { renderWithAuthProvider } from '../../../utils/tests';
 
-describe('when the admin page is mounted', () => {
+describe('When the admin page is mounted', () => {
   it('must display the admin username', () => {
     renderWithAuthProvider(
       <AuthContext.Provider value={{ user: { username: 'John Doe' } }}>

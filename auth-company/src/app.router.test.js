@@ -35,7 +35,7 @@ describe('When the user is not authenticated and enters on employee page', () =>
   });
 });
 
-describe('when the admin is authenticated in login page', () => {
+describe('When the admin is authenticated in login page', () => {
   it('must be redirected to admin page', async () => {
     renderWithAuthProvider(<AppRouter />)
     fillInputs({email: ADMIN_EMAIL})
@@ -45,7 +45,7 @@ describe('when the admin is authenticated in login page', () => {
   });
 });
 
-describe('when the admin goes to employees page', () => {
+describe('When the admin goes to employees page', () => {
   it('must have access', () => {
     goTo('/admin');
     renderWithAuthProvider(<AppRouter />, { isAuth: true, role: 'admin' });
@@ -54,7 +54,7 @@ describe('when the admin goes to employees page', () => {
   });
 });
 
-describe('when the employee is authenticated in login page', () => {
+describe('When the employee is authenticated in login page', () => {
   it('must be redirected to employee page', async () => {
     renderWithAuthProvider(<AppRouter />);
     fillInputs({ email: EMPLOYEE_EMAIL });
@@ -63,7 +63,7 @@ describe('when the employee is authenticated in login page', () => {
   });
 });
 
-describe('when the employee goes to admin page', () => {
+describe('When the employee goes to admin page', () => {
   it('must redirect to employee page', () => {
     goTo('/admin');
     renderWithAuthProvider(<AppRouter />, { isAuth: true, role: 'employee' });

@@ -9,7 +9,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import { login } from '../../services/index';
 import { validateEmail, validatePassword } from '../../../utils/helpers';
 
-const LoginPage = ({ onSuccessLogin }) => {
+export const LoginPage = ({ onSuccessLogin }) => {
   const {handleSuccessLogin, user} = useContext(AuthContext)
   const [emailValidationMessage, setEmailValidationMessage] = useState('');
   const [passwordValidationMessage, setPasswordValidationMessage] = useState('');

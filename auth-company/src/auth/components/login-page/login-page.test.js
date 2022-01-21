@@ -2,7 +2,7 @@ import React from 'react';
 import { screen, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
-import LoginPage from './login-page';
+import { LoginPage } from './login-page';
 import { handlers, handleInvalidCredentials } from '../../../mocks/handlers';
 import { renderWithRouter, fillInputs, getSendButton } from '../../../utils/tests';
 import { AuthContext } from '../../../utils/contexts/auth-context';
